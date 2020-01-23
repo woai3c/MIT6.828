@@ -3,7 +3,7 @@
 ## 前期准备
 ### 安装工具包
 ```shell
-sudo apt-get install -y build-essential libtool libglib2.0-dev libpixman-1-dev zlib1g-dev git libfdt-dev gcc-multilib gdb gcc-multilib
+sudo apt-get install -y build-essential libtool libglib2.0-dev libpixman-1-dev zlib1g-dev git libfdt-dev gcc-multilib gdb
 ```
 ### 克隆代码和QEMU
 ```git
