@@ -17,7 +17,9 @@ git clone https://github.com/mit-pdos/6.828-qemu.git qemu
 ### 正式安装
 ##### 1. 切换到 QEMU 目录下
 执行 `./configure --disable-kvm --target-list="i386-softmmu x86_64-softmmu"`
+
 出现：`ERROR: Python not found. Use --python=/path/to/python`
+
 解决：添加`--python=python3`，还是不行提示`Note that Python 3 or later is not yet supported`。安装`python2.7`，然后使用`--python=python2.7`选项。
 
 ##### 2. 继续执行 `make && make install`
@@ -64,15 +66,20 @@ cc1: all warnings being treated as errors
 /home/wzd/qemu/rules.mak:57: recipe for target 'block/blkdebug.o' failed
 ```
 解决方法：`config-host.mak`文件中的`-Werror`去掉 
+
 再重新执行 `make && make install`
+
 在 `lab` 源码根目录下执行 `make`，如果看到
+
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200123144022511.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3E0MTEwMjAzODI=,size_16,color_FFFFFF,t_70)
 
 就说明编译成功了。
+
 然后执行`make qemu`，看到如下信息就说明环境搭建好了。
+
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200123144048687.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3E0MTEwMjAzODI=,size_16,color_FFFFFF,t_70)
 
 ## 参考
-[MIT-6.828-JOS-环境搭建](https://www.cnblogs.com/gatsby123/p/9746193.html)
-[MIT6.828课程实验环境搭建](https://www.jianshu.com/p/3d6a9df84056)
-[mit6.828 实验环境配置](https://www.jianshu.com/p/1ca94cdd9c89)
+* [MIT-6.828-JOS-环境搭建](https://www.cnblogs.com/gatsby123/p/9746193.html)
+* [MIT6.828课程实验环境搭建](https://www.jianshu.com/p/3d6a9df84056)
+* [mit6.828 实验环境配置](https://www.jianshu.com/p/1ca94cdd9c89)
