@@ -1,0 +1,89 @@
+#
+# Makefile fragment for JOS kernel.
+# This is NOT a complete makefile;
+# you must run GNU make in the top-level directory
+# where the GNUmakefile is located.
+#
+
+OBJDIRS += kern
+
+KERN_LDFLAGS := $(LDFLAGS) -T kern/kernel.ld -nostdlib
+
+# entry.S must be first, so that it's the first code in the text segment!!!
+#
+# We also snatch the use of a couple handy source files
+# from the lib directory, to avoid gratuitous code duplication.
+KERN_SRCFILES :=	kern/entry.S \
+			kern/entrypgdir.c \
+			kern/init.c \
+			kern/console.c \
+			kern/monitor.c \
+			kern/pmap.c \
+			kern/env.c \
+			kern/kclock.c \
+			kern/picirq.c \
+			kern/printf.c \
+			kern/trap.c \
+			kern/trapentry.S \
+			kern/sched.c \
+			kern/syscall.c \
+			kern/kdebug.c \
+			lib/printfmt.c \
+			lib/readline.c \
+			lib/string.c
+
+# Only build files if they exist.
+KERN_SRCFILES := $(wildcard $(KERN_SRCFILES))
+
+# Binary program images to embed within the kernel.
+KERN_BINFILES := 
+
+KERN_OBJFILES := $(patsubst %.c, $(OBJDIR)/%.o, $(KERN_SRCFILES))
+KERN_OBJFILES := $(patsubst %.S, $(OBJDIR)/%.o, $(KERN_OBJFILES))
+KERN_OBJFILES := $(patsubst $(OBJDIR)/lib/%, $(OBJDIR)/kern/%, $(KERN_OBJFILES))
+
+KERN_BINFILES := $(patsubst %, $(OBJDIR)/%, $(KERN_BINFILES))
+
+# How to build kernel object files
+$(OBJDIR)/kern/%.o: kern/%.c $(OBJDIR)/.vars.KERN_CFLAGS
+	@echo + cc $<
+	@mkdir -p $(@D)
+	$(V)$(CC) -nostdinc $(KERN_CFLAGS) -c -o $@ $<
+
+$(OBJDIR)/kern/%.o: kern/%.S $(OBJDIR)/.vars.KERN_CFLAGS
+	@echo + as $<
+	@mkdir -p $(@D)
+	$(V)$(CC) -nostdinc $(KERN_CFLAGS) -c -o $@ $<
+
+$(OBJDIR)/kern/%.o: lib/%.c $(OBJDIR)/.vars.KERN_CFLAGS
+	@echo + cc $<
+	@mkdir -p $(@D)
+	$(V)$(CC) -nostdinc $(KERN_CFLAGS) -c -o $@ $<
+
+# Special flags for kern/init
+$(OBJDIR)/kern/init.o: override KERN_CFLAGS+=$(INIT_CFLAGS)
+$(OBJDIR)/kern/init.o: $(OBJDIR)/.vars.INIT_CFLAGS
+
+# How to build the kernel itself
+$(OBJDIR)/kern/kernel: $(KERN_OBJFILES) $(KERN_BINFILES) kern/kernel.ld \
+	  $(OBJDIR)/.vars.KERN_LDFLAGS
+	@echo + ld $@
+	$(V)$(LD) -o $@ $(KERN_LDFLAGS) $(KERN_OBJFILES) $(GCC_LIB) -b binary $(KERN_BINFILES)
+	$(V)$(OBJDUMP) -S $@ > $@.asm
+	$(V)$(NM) -n $@ > $@.sym
+
+# How to build the kernel disk image
+$(OBJDIR)/kern/kernel.img: $(OBJDIR)/kern/kernel $(OBJDIR)/boot/boot
+	@echo + mk $@
+	$(V)dd if=/dev/zero of=$(OBJDIR)/kern/kernel.img~ count=10000 2>/dev/null
+	$(V)dd if=$(OBJDIR)/boot/boot of=$(OBJDIR)/kern/kernel.img~ conv=notrunc 2>/dev/null
+	$(V)dd if=$(OBJDIR)/kern/kernel of=$(OBJDIR)/kern/kernel.img~ seek=1 conv=notrunc 2>/dev/null
+	$(V)mv $(OBJDIR)/kern/kernel.img~ $(OBJDIR)/kern/kernel.img
+
+all: $(OBJDIR)/kern/kernel.img
+
+grub: $(OBJDIR)/jos-grub
+
+$(OBJDIR)/jos-grub: $(OBJDIR)/kern/kernel
+	@echo + oc $@
+	$(V)$(OBJCOPY) --adjust-vma=0x10000000 $^ $@
