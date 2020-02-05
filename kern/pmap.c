@@ -291,7 +291,7 @@ struct PageInfo *
 page_alloc(int alloc_flags)
 {
     if (page_free_list == NULL) {
-        cprintf("error: out of memory\n");
+        cprintf("error: out of free memory\n");
         return NULL;
     }
 
