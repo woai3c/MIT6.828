@@ -291,7 +291,7 @@ struct PageInfo *
 page_alloc(int alloc_flags)
 {
     if (page_free_list == NULL) {
-        cprintf("error: out of free memory\n");
+        cprintf("page_alloc: out of free memory\n");
         return NULL;
     }
 
@@ -316,7 +316,7 @@ page_free(struct PageInfo *pp)
 	// Hint: You may want to panic if pp->pp_ref is nonzero or
 	// pp->pp_link is not NULL.
 	if (pp->pp_ref != 0 || pp->pp_link != NULL) {
-		panic("error: can not free the memory");
+		panic("page_free: can not free the memory");
 		return;
 	}
 	
@@ -361,7 +361,16 @@ pte_t *
 pgdir_walk(pde_t *pgdir, const void *va, int create)
 {
 	// Fill this function in
-	return NULL;
+	pde_t *dir = pgdir + PDX(va);
+	if (!(*dir & PTE_P)) {
+		if (!create) return NULL;
+		struct PageInfo* pp = page_alloc(1);
+		if (pp == NULL) return NULL;
+		pp->pp_ref++;
+		*dir = page2pa(pp) | PTE_P | PTE_U | PTE_W;
+	}
+
+	return (pte_t *) KADDR(PTE_ADDR(*dir)) + PTX(va);
 }
 
 //
@@ -379,6 +388,17 @@ static void
 boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm)
 {
 	// Fill this function in
+	size_t pages = ROUNDUP(size, PGSIZE) / PGSIZE;
+	for (size_t i = 0; i < pages; i++) {
+		pte_t *pte = pgdir_walk(pgdir, (void *) va, 1);
+		if (pte == NULL) {
+			panic("boot_map_region: out of memory!\n");
+		}
+
+		*pte = pa | PTE_P | perm;
+		va += PGSIZE;
+		pa += PGSIZE;
+	}
 }
 
 //
@@ -410,6 +430,18 @@ int
 page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 {
 	// Fill this function in
+	pte_t *pte = pgdir_walk(pgdir, va, 1);
+	if (!pte) {
+		return -E_NO_MEM;
+	}
+
+	pp->pp_ref++;
+	if (*pte & PTE_P) {
+		page_remove(pgdir, va);
+		tlb_invalidate(pgdir, va);
+	}
+
+	*pte = page2pa(pp) | PTE_P | perm;
 	return 0;
 }
 
@@ -428,7 +460,17 @@ struct PageInfo *
 page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
 {
 	// Fill this function in
-	return NULL;
+	pte_t *pte = pgdir_walk(pgdir, va, 0);
+	if (!pte || !(*pte & PTE_P)) {
+		cprintf("page_lookup: can not find out the page mapped at virtual address 'va'.\n");
+		return NULL;
+	}
+
+	if (pte_store) {
+		*pte_store = pte;
+	}
+
+	return pa2page(PTE_ADDR(*pte));
 }
 
 //
@@ -450,6 +492,13 @@ void
 page_remove(pde_t *pgdir, void *va)
 {
 	// Fill this function in
+	pte_t *pte_store;
+	struct PageInfo *pp = page_lookup(pgdir, va, &pte_store);
+	if (pp) {
+		page_decref(pp);
+		*pte_store = 0;
+		tlb_invalidate(pgdir, va);
+	}
 }
 
 //
