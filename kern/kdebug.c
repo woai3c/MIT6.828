@@ -4,11 +4,20 @@
 #include <inc/assert.h>
 
 #include <kern/kdebug.h>
+#include <kern/pmap.h>
+#include <kern/env.h>
 
 extern const struct Stab __STAB_BEGIN__[];	// Beginning of stabs table
 extern const struct Stab __STAB_END__[];	// End of stabs table
 extern const char __STABSTR_BEGIN__[];		// Beginning of string table
 extern const char __STABSTR_END__[];		// End of string table
+
+struct UserStabData {
+	const struct Stab *stabs;
+	const struct Stab *stab_end;
+	const char *stabstr;
+	const char *stabstr_end;
+};
 
 
 // stab_binsearch(stabs, region_left, region_right, type, addr)
@@ -123,8 +132,24 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 		stabstr = __STABSTR_BEGIN__;
 		stabstr_end = __STABSTR_END__;
 	} else {
-		// Can't search for user-level addresses yet!
-  	        panic("User address");
+		// The user-application linker script, user/user.ld,
+		// puts information about the application's stabs (equivalent
+		// to __STAB_BEGIN__, __STAB_END__, __STABSTR_BEGIN__, and
+		// __STABSTR_END__) in a structure located at virtual address
+		// USTABDATA.
+		const struct UserStabData *usd = (const struct UserStabData *) USTABDATA;
+
+		// Make sure this memory is valid.
+		// Return -1 if it is not.  Hint: Call user_mem_check.
+		// LAB 3: Your code here.
+
+		stabs = usd->stabs;
+		stab_end = usd->stab_end;
+		stabstr = usd->stabstr;
+		stabstr_end = usd->stabstr_end;
+
+		// Make sure the STABS and string table memory is valid.
+		// LAB 3: Your code here.
 	}
 
 	// String table validity checks
