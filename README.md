@@ -1,4 +1,5 @@
 # [MIT6.828官网](https://pdos.csail.mit.edu/6.828/2018/schedule.html)
+理论与实践相结合的经典，做完本项目所有实验，将会获得实现一个简单的操作系统内核的成就。
 ## 0. [MIT6.828 实验环境安装教程](https://github.com/woai3c/MIT6.828/blob/master/docs/install.md)
 ## 1. Lab1参考资料
 * [Lab1:Booting a PC](https://www.cnblogs.com/gatsby123/p/9759153.html)
