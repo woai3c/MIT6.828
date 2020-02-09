@@ -65,7 +65,44 @@ trap_init(void)
 	extern struct Segdesc gdt[];
 
 	// LAB 3: Your code here.
+	void divide_error_handler();
+	void debug_exception_handler();
+	void non_maskable_interrupt_handler();
+	void breakpoint_handler();
+	void overflow_handler();
+	void bounds_check_handler();
+	void invalid_opcode_handler();
+	void device_not_available_handler();
+	void double_fault_handler();
+	void invalid_tss_handler();
+	void segment_not_present_handler();
+	void stack_exception_handler();
+	void general_protection_fault_handler();
+	void pagefault_handler();
+	void floating_point_error_handler();
+	void alignment_check_handler();
+	void machine_check_handler();
+	void simd_floating_point_error_handler();
 
+	// set up trap gate descriptor
+	SETGATE(idt[T_DIVIDE],	 1, GD_KT, divide_error_handler,           	   0);
+	SETGATE(idt[T_DEBUG],    1, GD_KT, debug_exception_handler,            0);
+	SETGATE(idt[T_NMI],      1, GD_KT, non_maskable_interrupt_handler,     0);
+	SETGATE(idt[T_BRKPT],    1, GD_KT, breakpoint_handler,                 3);
+	SETGATE(idt[T_OFLOW],    1, GD_KT, overflow_handler,                   0);
+	SETGATE(idt[T_BOUND],    1, GD_KT, bounds_check_handler,               0);
+	SETGATE(idt[T_ILLOP],    1, GD_KT, invalid_opcode_handler,             0);
+	SETGATE(idt[T_DEVICE],   1, GD_KT, device_not_available_handler,       0);
+	SETGATE(idt[T_DBLFLT],   1, GD_KT, double_fault_handler,               0);
+	SETGATE(idt[T_TSS],      1, GD_KT, invalid_tss_handler,                0);
+	SETGATE(idt[T_SEGNP],    1, GD_KT, segment_not_present_handler,        0);
+	SETGATE(idt[T_STACK],    1, GD_KT, stack_exception_handler,            0);
+	SETGATE(idt[T_GPFLT],    1, GD_KT, general_protection_fault_handler,   0);
+	SETGATE(idt[T_PGFLT],    1, GD_KT, pagefault_handler,                  0);
+	SETGATE(idt[T_FPERR],    1, GD_KT, floating_point_error_handler,       0);
+	SETGATE(idt[T_ALIGN],    1, GD_KT, alignment_check_handler,            0);
+	SETGATE(idt[T_MCHK],     1, GD_KT, machine_check_handler,              0);
+	SETGATE(idt[T_SIMDERR],  1, GD_KT, simd_floating_point_error_handler,  0);
 	// Per-CPU setup 
 	trap_init_percpu();
 }
