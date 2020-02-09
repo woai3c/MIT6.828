@@ -13,3 +13,6 @@
 * [MIT-6.828 Lab 2: Memory Management实验报告](https://www.cnblogs.com/gatsby123/p/9832223.html)
 * [《MIT JOS Lab2: Memory Management》实验报告](https://blog.csdn.net/qq_32473685/article/details/99625128)
 * [MIT6.828操作系统工程Lab2-Memory Management实验报告](https://blog.codedragon.tech/2018/02/20/MIT6-828%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%B7%A5%E7%A8%8BLab2-Memory-Management%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/)
+## 3. Lab3参考资料
+* [Lab 3: User Environments实验报告](https://www.cnblogs.com/gatsby123/p/9838304.html)
+* [MIT6.828操作系统工程Lab3-User Environments实验报告](https://blog.codedragon.tech/2018/02/23/MIT6-828%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%B7%A5%E7%A8%8BLab3-User-Environments%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/)
