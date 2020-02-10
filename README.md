@@ -1,5 +1,9 @@
 # [MIT6.828官网](https://pdos.csail.mit.edu/6.828/2018/schedule.html)
-理论与实践相结合的经典，做完本项目所有实验，将会获得实现一个简单的操作系统内核的成就。
+理论与实践相结合的经典，做完这个项目所有实验，将会实现一个简单的操作系统内核。
+
+做这个项目之前建议看一下这两本书：
+* [x86汇编语言:从实模式到保护模式完整版](https://github.com/woai3c/recommended-books/blob/master/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/x86%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%20%20%E4%BB%8E%E5%AE%9E%E6%A8%A1%E5%BC%8F%E5%88%B0%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E5%AE%8C%E6%95%B4%E7%89%88.pdf)
+* [xv6-chinese](https://github.com/woai3c/recommended-books/blob/master/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/xv6-chinese.pdf)
 ## 0. [MIT6.828 实验环境安装教程](https://github.com/woai3c/MIT6.828/blob/master/docs/install.md)
 ## 1. Lab1参考资料
 * [Lab1:Booting a PC](https://www.cnblogs.com/gatsby123/p/9759153.html)
