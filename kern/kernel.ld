@@ -44,18 +44,19 @@ SECTIONS
 
 	/* The data segment */
 	.data : {
-		*(.data)
+		*(.data .data.*)
 	}
 
 	.bss : {
 		PROVIDE(edata = .);
-		*(.bss)
+		*(.dynbss)
+		*(.bss .bss.*)
+		*(COMMON)
 		PROVIDE(end = .);
-		BYTE(0)
 	}
 
 
 	/DISCARD/ : {
-		*(.eh_frame .note.GNU-stack)
+		*(.eh_frame .note.GNU-stack .comment .note)
 	}
 }
