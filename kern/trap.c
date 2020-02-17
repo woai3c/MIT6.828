@@ -93,24 +93,24 @@ trap_init(void)
 	void system_call();
 
 	// set up trap gate descriptor
-	SETGATE(idt[T_DIVIDE],	 1, GD_KT, divide_error_handler,           	   0);
-	SETGATE(idt[T_DEBUG],    1, GD_KT, debug_exception_handler,            0);
-	SETGATE(idt[T_NMI],      1, GD_KT, non_maskable_interrupt_handler,     0);
+	SETGATE(idt[T_DIVIDE],	 0, GD_KT, divide_error_handler,           	   0);
+	SETGATE(idt[T_DEBUG],    0, GD_KT, debug_exception_handler,            0);
+	SETGATE(idt[T_NMI],      0, GD_KT, non_maskable_interrupt_handler,     0);
 	SETGATE(idt[T_BRKPT],    1, GD_KT, breakpoint_handler,                 3);
-	SETGATE(idt[T_OFLOW],    1, GD_KT, overflow_handler,                   0);
-	SETGATE(idt[T_BOUND],    1, GD_KT, bounds_check_handler,               0);
-	SETGATE(idt[T_ILLOP],    1, GD_KT, invalid_opcode_handler,             0);
-	SETGATE(idt[T_DEVICE],   1, GD_KT, device_not_available_handler,       0);
-	SETGATE(idt[T_DBLFLT],   1, GD_KT, double_fault_handler,               0);
-	SETGATE(idt[T_TSS],      1, GD_KT, invalid_tss_handler,                0);
-	SETGATE(idt[T_SEGNP],    1, GD_KT, segment_not_present_handler,        0);
-	SETGATE(idt[T_STACK],    1, GD_KT, stack_exception_handler,            0);
-	SETGATE(idt[T_GPFLT],    1, GD_KT, general_protection_fault_handler,   0);
-	SETGATE(idt[T_PGFLT],    1, GD_KT, pagefault_handler,                  0);
-	SETGATE(idt[T_FPERR],    1, GD_KT, floating_point_error_handler,       0);
-	SETGATE(idt[T_ALIGN],    1, GD_KT, alignment_check_handler,            0);
-	SETGATE(idt[T_MCHK],     1, GD_KT, machine_check_handler,              0);
-	SETGATE(idt[T_SIMDERR],  1, GD_KT, simd_floating_point_error_handler,  0);
+	SETGATE(idt[T_OFLOW],    0, GD_KT, overflow_handler,                   0);
+	SETGATE(idt[T_BOUND],    0, GD_KT, bounds_check_handler,               0);
+	SETGATE(idt[T_ILLOP],    0, GD_KT, invalid_opcode_handler,             0);
+	SETGATE(idt[T_DEVICE],   0, GD_KT, device_not_available_handler,       0);
+	SETGATE(idt[T_DBLFLT],   0, GD_KT, double_fault_handler,               0);
+	SETGATE(idt[T_TSS],      0, GD_KT, invalid_tss_handler,                0);
+	SETGATE(idt[T_SEGNP],    0, GD_KT, segment_not_present_handler,        0);
+	SETGATE(idt[T_STACK],    0, GD_KT, stack_exception_handler,            0);
+	SETGATE(idt[T_GPFLT],    0, GD_KT, general_protection_fault_handler,   0);
+	SETGATE(idt[T_PGFLT],    0, GD_KT, pagefault_handler,                  0);
+	SETGATE(idt[T_FPERR],    0, GD_KT, floating_point_error_handler,       0);
+	SETGATE(idt[T_ALIGN],    0, GD_KT, alignment_check_handler,            0);
+	SETGATE(idt[T_MCHK],     0, GD_KT, machine_check_handler,              0);
+	SETGATE(idt[T_SIMDERR],  0, GD_KT, simd_floating_point_error_handler,  0);
 	SETGATE(idt[T_SYSCALL],  1, GD_KT, system_call,  3);
 
 	// Per-CPU setup 
@@ -148,18 +148,18 @@ trap_init_percpu(void)
 
 	// Setup a TSS so that we get the right stack
 	// when we trap to the kernel.
-	ts.ts_esp0 = KSTACKTOP;
-	ts.ts_ss0 = GD_KD;
-	ts.ts_iomb = sizeof(struct Taskstate);
+	thiscpu->cpu_ts .ts_esp0 = (uintptr_t) percpu_kstacks[cpunum()];
+	thiscpu->cpu_ts.ts_ss0 = GD_KD;
+	thiscpu->cpu_ts.ts_iomb = sizeof(struct Taskstate);
 
 	// Initialize the TSS slot of the gdt.
-	gdt[GD_TSS0 >> 3] = SEG16(STS_T32A, (uint32_t) (&ts),
+	gdt[(GD_TSS0 >> 3) + cpunum()] = SEG16(STS_T32A, (uint32_t) (&(thiscpu->cpu_ts)),
 					sizeof(struct Taskstate) - 1, 0);
-	gdt[GD_TSS0 >> 3].sd_s = 0;
+	gdt[(GD_TSS0 >> 3) + cpunum()].sd_s = 0;
 
 	// Load the TSS selector (like other segment selectors, the
 	// bottom three bits are special; we leave them 0)
-	ltr(GD_TSS0);
+	ltr(GD_TSS0 + (cpunum() << 3));
 
 	// Load the IDT
 	lidt(&idt_pd);

@@ -264,7 +264,9 @@ mem_init_mp(void)
 	//     Permissions: kernel RW, user NONE
 	//
 	// LAB 4: Your code here:
-
+	for (int i = 0; i < NCPU; i++) {
+		boot_map_region(kern_pgdir, KSTACKTOP - KSTKSIZE - i * (KSTKSIZE + KSTKGAP), KSTKSIZE, PADDR(percpu_kstacks[i]), PTE_W);
+	}
 }
 
 // --------------------------------------------------------------
@@ -306,12 +308,16 @@ page_init(void)
 	pages[0].pp_ref = 1;
     pages[0].pp_link = NULL;
 	size_t i;
-    size_t kernel_end_page = PADDR(boot_alloc(0)) / PGSIZE;     
+    size_t kernel_end_page = PADDR(boot_alloc(0)) / PGSIZE;
+	size_t mpentry = MPENTRY_PADDR / PGSIZE;
     for (i = 1; i < npages; i++) {
         if (i >= npages_basemem && i < kernel_end_page) {
             pages[i].pp_ref = 1;
             pages[i].pp_link = NULL;
-        } else {
+        } else if (i == mpentry) {
+			pages[i].pp_ref = 1;
+            pages[i].pp_link = NULL;
+		} else {
             pages[i].pp_ref = 0;
             pages[i].pp_link = page_free_list;
             page_free_list = &pages[i];
@@ -590,7 +596,16 @@ mmio_map_region(physaddr_t pa, size_t size)
 	// Hint: The staff solution uses boot_map_region.
 	//
 	// Your code here:
-	panic("mmio_map_region not implemented");
+	size_t start = ROUNDDOWN(pa, PGSIZE);
+	size_t end = ROUNDUP(size + pa, PGSIZE);
+	if (base + end - start >= MMIOLIM) {
+		panic("mmio_map_region: overflow MMIOLIM!\n");
+	}
+
+	size = end - start;
+	boot_map_region(kern_pgdir, base, size, start, PTE_PCD | PTE_PWT | PTE_W);
+	base += size;
+	return (void *) (base - size);
 }
 
 static uintptr_t user_mem_check_addr;
