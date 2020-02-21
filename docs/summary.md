@@ -5,7 +5,8 @@
 
 中断发生时，CPU 自动压入 ss esp eflags cs eip error_code，然后再手动压入 ds es。
 
-此时仍处于用户模式，然后将 ds es 指向内核数据段，执行 call trap，cs eip 指向内核代码段，到这一步就已经从用户态转为内核态了。
+此时仍处于用户态，然后将 ds es 指向内核数据段，执行 call trap，cs eip 指向内核代码段，到这一步就已经从用户态转为内核态了。
+在 trap 中，根据中断号调用对应的代码，最后再通过执行 env_pop_tf 将 tf 指针指向的堆栈值弹出，恢复寄存器的值，恢复用户态（刚才压入栈的那一堆寄存器的值）。
 * [参考资料](https://www.cnblogs.com/gatsby123/p/9838304.html)
 ## Lab 4
 #### 练习6
