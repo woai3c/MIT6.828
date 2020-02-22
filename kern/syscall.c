@@ -87,8 +87,9 @@ sys_exofork(void)
 	struct Env *child;
 	int status = env_alloc(&child, curenv->env_id);
 	if (status < 0) return status;
-	memcpy(&child->env_tf, &curenv->env_tf, sizeof(curenv->env_tf));
+	child->env_tf = curenv->env_tf;
 	child->env_status = ENV_NOT_RUNNABLE;
+	child->env_tf.tf_regs.reg_eax = 0;		//新的用户环境从sys_exofork()的返回值应该为0
 	return child->env_id;
 }
 
@@ -165,11 +166,11 @@ sys_page_alloc(envid_t envid, void *va, int perm)
 	struct Env *env;
 	int state = envid2env(envid, &env, 1);
 	if (state < 0) return state;
+
 	if ((size_t) va >= UTOP || ((size_t) va % PGSIZE) != 0) return -E_INVAL;
 	if ((perm & PTE_U) != PTE_U || (perm & PTE_P) != PTE_P) return -E_INVAL;
 	
-	struct PageInfo *pp;
-	pp = page_alloc(1);
+	struct PageInfo *pp = page_alloc(1);
 	if (pp == NULL) return -E_NO_MEM;
 	if (page_insert(env->env_pgdir, pp, va, perm) < 0) {
 		page_free(pp);
@@ -213,19 +214,18 @@ sys_page_map(envid_t srcenvid, void *srcva,
 
 	struct Env *senv, *denv;
 	int state1, state2;
-	state1 = envid2env(srcenvid, &senv, 0);
-	state2 = envid2env(dstenvid, &denv, 0);
+	state1 = envid2env(srcenvid, &senv, 1);
+	state2 = envid2env(dstenvid, &denv, 1);
 	if (state1 < 0) return state1;
 	if (state2 < 0) return state2;
 
-	struct PageInfo *pp;
-	pte_t *spte, *dpte;
-	pp = page_lookup(senv->env_pgdir, srcva, &spte);
+	pte_t *pte;
+	struct PageInfo *pp = page_lookup(senv->env_pgdir, srcva, &pte);
 	if (pp == NULL) return -E_INVAL;
-	if ((*spte & perm) != perm || (*spte & PTE_W) != PTE_W) return -E_INVAL;
 
-	if (page_insert(denv->env_pgdir, pp, dstva, perm) < 0) return -E_NO_MEM;
-	return 0;
+	if ((*pte & perm) != perm || (*pte & PTE_W) != PTE_W) return -E_INVAL;
+
+	return page_insert(denv->env_pgdir, pp, dstva, perm);
 }
 
 // Unmap the page of memory at 'va' in the address space of 'envid'.
@@ -242,7 +242,7 @@ sys_page_unmap(envid_t envid, void *va)
 
 	// LAB 4: Your code here.
 	struct Env *env;
-	if (envid2env(envid, &env, 0) < 0) return -E_BAD_ENV;
+	if (envid2env(envid, &env, 1) < 0) return -E_BAD_ENV;
 	if ((size_t) va >= UTOP || ((size_t) va % PGSIZE) != 0) {
 		return -E_INVAL;
 	}
@@ -339,8 +339,15 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 			sys_yield();
 			return 0;
 		case SYS_exofork:
-			sys_exofork();
-			return 0;
+			return sys_exofork();
+		case SYS_env_set_status:
+			return sys_env_set_status((envid_t) a1, (int) a2);
+		case SYS_page_alloc:
+			return sys_page_alloc((envid_t) a1, (void *) a2, (int) a3);
+		case SYS_page_map:
+			return sys_page_map((envid_t) a1, (void *) a2, (envid_t) a3, (void *) a4, (int) a5);
+		case SYS_page_unmap:
+			return sys_page_unmap((envid_t) a1, (void *) a2);
 		default:
 			return -E_INVAL;
 	}

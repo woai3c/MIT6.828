@@ -309,7 +309,6 @@ trap(struct Trapframe *tf)
 	// scheduled, so we should return to the current environment
 	// if doing so makes sense.
 	if (curenv && curenv->env_status == ENV_RUNNING) {
-		cprintf("env.id: %08x trap\n", curenv->env_id);
 		env_run(curenv);
 	} else {
 		sched_yield();

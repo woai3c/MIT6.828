@@ -35,13 +35,11 @@ sched_yield(void)
 	for (size_t i = 0; i < NENV; i++) {
 		size_t index = (start + i) % NENV;
 		if (envs[index].env_status == ENV_RUNNABLE) {
-			cprintf("env.id: %08x\n", envs[index].env_id);
 			env_run(&envs[index]);
 			break;
 		}
 	}
 
-	cprintf("no envs are runnable\n");
 	if(curenv && curenv->env_status == ENV_RUNNING) {
 		env_run(curenv);
 	}
