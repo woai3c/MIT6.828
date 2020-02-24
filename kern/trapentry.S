@@ -71,18 +71,18 @@ TRAPHANDLER_NOEC(system_call, T_SYSCALL)
  * Lab 3: Your code here for _alltraps
  */
 _alltraps:
-// push ds and es and general registers
+# push ds and es and general registers
 push %ds
 push %es
 pushal
 
-// load ds and es with GD_KD, for kernel stack locates in data
+# load ds and es with GD_KD, for kernel stack locates in data
 mov $GD_KD, %ax
 mov %ax, %ds
 mov %ax, %es
 
-// pass tf as an argument
+# pass tf as an argument
 pushl %esp
 
-// call trap and no need to return
+# call trap and no need to return
 call trap
