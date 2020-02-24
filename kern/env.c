@@ -367,6 +367,7 @@ load_icode(struct Env *e, uint8_t *binary)
     for (int i = 0; i < ph_num; i++) {
         if (ph[i].p_type == ELF_PROG_LOAD) { 
             region_alloc(e, (void *)ph[i].p_va, ph[i].p_memsz);
+			memset((void *)ph[i].p_va, 0, ph[i].p_memsz); // 初始化
             memcpy((void *)ph[i].p_va, binary + ph[i].p_offset, ph[i].p_filesz); 
         }
     }
@@ -541,4 +542,3 @@ env_run(struct Env *e)
 	unlock_kernel();
 	env_pop_tf(&e->env_tf);
 }
-

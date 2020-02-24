@@ -227,7 +227,7 @@ sys_page_map(envid_t srcenvid, void *srcva,
 	struct PageInfo *pp = page_lookup(senv->env_pgdir, srcva, &pte);
 	if (pp == NULL) return -E_INVAL;
 
-	if ((*pte & perm) != perm || (*pte & PTE_W) != PTE_W) return -E_INVAL;
+	if (((*pte & PTE_W) == 0) && (perm & PTE_W)) return -E_INVAL;
 
 	return page_insert(denv->env_pgdir, pp, dstva, perm);
 }

@@ -78,7 +78,7 @@ _pgfault_upcall:
 	# no longer use arithmetic operations or anything else that
 	# modifies eflags.
 	# LAB 4: Your code here.
-	popl %eax # 跳过 eip
+	addl $4, %esp #跳过eip
 	popfl
 	# Switch back to the adjusted trap-time stack.
 	# LAB 4: Your code here.
