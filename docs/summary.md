@@ -24,3 +24,50 @@
 4. 为子进程设置 `_pgfault_upcall`。
 5. 将子进程状态设置为 `ENV_RUNNABLE`。
 6. 为子进程的异常栈分配一个页的内存。
+
+#### 一次 fork 两个返回值
+```c
+envid_t envid = sys_exofork();
+if (envid < 0)
+  panic("sys_exofork: %e", envid);
+if (envid == 0) {
+  thisenv = &envs[ENVX(sys_getenvid())];
+  return 0;
+}
+```
+为什么每次 fork 后，要判断 envid 是否为零？
+
+因为 fork 时，子进程会把父进程的各个寄存器值也复制，包括 CS 和 IP。
+```c
+struct Trapframe {
+	struct PushRegs tf_regs;
+	uint16_t tf_es;
+	uint16_t tf_padding1;
+	uint16_t tf_ds;
+	uint16_t tf_padding2;
+	uint32_t tf_trapno;
+	/* below here defined by x86 hardware */
+	uint32_t tf_err;
+	uintptr_t tf_eip;
+	uint16_t tf_cs;
+	uint16_t tf_padding3;
+	uint32_t tf_eflags;
+	/* below here only when crossing rings, such as from user to kernel */
+	uintptr_t tf_esp;
+	uint16_t tf_ss;
+	uint16_t tf_padding4;
+} __attribute__((packed));
+```
+所以在 `sys_exofork()` 后父子进程的指令是相同的。
+
+`envid_t envid = sys_exofork();` 要分两步看。
+
+第一步是 `sys_exofork()`，第二步是将函数返回值（函数返回值存放在 eax）赋给 envid，在 fork 完之后，父子进程同样会执行 envid 的赋值操作，父进程将 eax 的值赋给 envid，这个值是刚创建的子进程 id，而子进程由于在初始化时 eax 被手动设为 0，所以 envid 的值为 0。
+```c
+// kern/syscall.c sys_exofork 函数
+child->env_tf.tf_regs.reg_eax = 0;
+```
+
+>如果system_call执行调度，父进程就会被换入到就绪队列中，失去CPU的使用权。那么可能是子进程也可能是其他进程继而得到CPU的使用权，开始执行。总之，子进程总会有执行的时刻，而子进程的pcb中的cs,eip寄存器保存的是和父进程通过int 0x80编程异常进入内核处理函数时一样的指令地址，即子进程也是从int 0x80后面的指令movl eax, res; return res开始执行，而子进程的eax的值被设置为0，从而子进程开始执行时的指令流程，和父进程从异常处理函数system_call返回到用户空间后的执行流程是一样的，将eax的值作为fork()API的返回值，从而完成子进程像是从fork()API返回的样子，但实质只是其执行流程是从fork()API返回处开始执行的，且返回值是0。
+
+[fork如何实现执行一次返回两个值的？](https://www.zhihu.com/question/24173190/answer/244790670)
