@@ -16,3 +16,11 @@
 3. 执行用户程序（user/yield.c），进入中断，打印 `"Hello, I am environment %08x.\n"`，再调用 `sys_yield()`
 4. 此时会进入第 3 个步骤，如此循环
 5. 循环完毕后输出用户程序最后一行语句，执行完毕
+
+#### fork 流程
+1. 使用 `set_pgfault_handler()` 设置缺页处理函数。
+2. 调用 `sys_exofork()` 系统调用，创建子进程。
+3. 将父进程的页映射到子进程，对于可写的页，将对应的 PTE 的 `PTE_COW` 位设置为1。
+4. 为子进程设置 `_pgfault_upcall`。
+5. 将子进程状态设置为 `ENV_RUNNABLE`。
+6. 为子进程的异常栈分配一个页的内存。
