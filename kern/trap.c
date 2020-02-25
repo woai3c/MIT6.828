@@ -92,11 +92,28 @@ trap_init(void)
 	void simd_floating_point_error_handler();
 	void system_call();
 
+	void irq_0_handler();
+	void irq_1_handler();
+	void irq_2_handler();
+	void irq_3_handler();
+	void irq_4_handler();
+	void irq_5_handler();
+	void irq_6_handler();
+	void irq_7_handler();
+	void irq_8_handler();
+	void irq_9_handler();
+	void irq_10_handler();
+	void irq_11_handler();
+	void irq_12_handler();
+	void irq_13_handler();
+	void irq_14_handler();
+	void irq_15_handler();
+
 	// set up trap gate descriptor
 	SETGATE(idt[T_DIVIDE],	 0, GD_KT, divide_error_handler,           	   0);
 	SETGATE(idt[T_DEBUG],    0, GD_KT, debug_exception_handler,            0);
 	SETGATE(idt[T_NMI],      0, GD_KT, non_maskable_interrupt_handler,     0);
-	SETGATE(idt[T_BRKPT],    1, GD_KT, breakpoint_handler,                 3);
+	SETGATE(idt[T_BRKPT],    0, GD_KT, breakpoint_handler,                 0);
 	SETGATE(idt[T_OFLOW],    0, GD_KT, overflow_handler,                   0);
 	SETGATE(idt[T_BOUND],    0, GD_KT, bounds_check_handler,               0);
 	SETGATE(idt[T_ILLOP],    0, GD_KT, invalid_opcode_handler,             0);
@@ -111,8 +128,24 @@ trap_init(void)
 	SETGATE(idt[T_ALIGN],    0, GD_KT, alignment_check_handler,            0);
 	SETGATE(idt[T_MCHK],     0, GD_KT, machine_check_handler,              0);
 	SETGATE(idt[T_SIMDERR],  0, GD_KT, simd_floating_point_error_handler,  0);
-	SETGATE(idt[T_SYSCALL],  1, GD_KT, system_call,  3);
+	SETGATE(idt[T_SYSCALL],  0, GD_KT, system_call,  3);
 
+	SETGATE(idt[IRQ_OFFSET + 0],  0, GD_KT, irq_0_handler,  0);
+	SETGATE(idt[IRQ_OFFSET + 1],  0, GD_KT, irq_1_handler,  0);
+	SETGATE(idt[IRQ_OFFSET + 2],  0, GD_KT, irq_2_handler,  0);
+	SETGATE(idt[IRQ_OFFSET + 3],  0, GD_KT, irq_3_handler,  0);
+	SETGATE(idt[IRQ_OFFSET + 4],  0, GD_KT, irq_4_handler,  0);
+	SETGATE(idt[IRQ_OFFSET + 5],  0, GD_KT, irq_5_handler,  0);
+	SETGATE(idt[IRQ_OFFSET + 6],  0, GD_KT, irq_6_handler,  0);
+	SETGATE(idt[IRQ_OFFSET + 7],  0, GD_KT, irq_7_handler,  0);
+	SETGATE(idt[IRQ_OFFSET + 8],  0, GD_KT, irq_8_handler,  0);
+	SETGATE(idt[IRQ_OFFSET + 9],  0, GD_KT, irq_9_handler,  0);
+	SETGATE(idt[IRQ_OFFSET + 10], 0, GD_KT, irq_10_handler, 0);
+	SETGATE(idt[IRQ_OFFSET + 11], 0, GD_KT, irq_11_handler, 0);
+	SETGATE(idt[IRQ_OFFSET + 12], 0, GD_KT, irq_12_handler, 0);
+	SETGATE(idt[IRQ_OFFSET + 13], 0, GD_KT, irq_13_handler, 0);
+	SETGATE(idt[IRQ_OFFSET + 14], 0, GD_KT, irq_14_handler, 0);
+	SETGATE(idt[IRQ_OFFSET + 15], 0, GD_KT, irq_15_handler, 0);
 	// Per-CPU setup 
 	trap_init_percpu();
 }
@@ -223,7 +256,6 @@ trap_dispatch(struct Trapframe *tf)
 
 	if (tf->tf_trapno == T_BRKPT) {
 		monitor(tf);
-		return;
 	}
 
 	if (tf->tf_trapno == T_SYSCALL) {
@@ -243,7 +275,10 @@ trap_dispatch(struct Trapframe *tf)
 	// Handle clock interrupts. Don't forget to acknowledge the
 	// interrupt using lapic_eoi() before calling the scheduler!
 	// LAB 4: Your code here.
-
+	if (tf->tf_trapno == IRQ_OFFSET + IRQ_TIMER) {
+        lapic_eoi();
+        sched_yield();
+    }
 	// Unexpected trap: The user process or the kernel has a bug.
 	print_trapframe(tf);
 	if (tf->tf_cs == GD_KT)
