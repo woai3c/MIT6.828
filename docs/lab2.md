@@ -96,4 +96,4 @@ JOS将线性地址空间分为两部分，ULIM以上的部分用户没有权限�
  */
  ```
  ## 虚拟内存空间与物理内存空间的映射
- 
+ ![](https://github.com/woai3c/MIT6.828/blob/master/docs/map.png)
