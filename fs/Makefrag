@@ -1,0 +1,77 @@
+
+OBJDIRS += fs
+
+FSOFILES := 		$(OBJDIR)/fs/ide.o \
+			$(OBJDIR)/fs/bc.o \
+			$(OBJDIR)/fs/fs.o \
+			$(OBJDIR)/fs/serv.o \
+			$(OBJDIR)/fs/test.o \
+
+USERAPPS := 		$(OBJDIR)/user/init
+
+FSIMGTXTFILES :=	fs/newmotd \
+			fs/motd
+
+
+USERAPPS :=		$(USERAPPS) \
+			$(OBJDIR)/user/cat \
+			$(OBJDIR)/user/echo \
+			$(OBJDIR)/user/init \
+			$(OBJDIR)/user/ls \
+			$(OBJDIR)/user/lsfd \
+			$(OBJDIR)/user/num \
+			$(OBJDIR)/user/forktree \
+			$(OBJDIR)/user/primes \
+			$(OBJDIR)/user/primespipe \
+			$(OBJDIR)/user/sh \
+			$(OBJDIR)/user/testfdsharing \
+			$(OBJDIR)/user/testkbd \
+			$(OBJDIR)/user/testpipe \
+			$(OBJDIR)/user/testpteshare \
+			$(OBJDIR)/user/testshell \
+			$(OBJDIR)/user/hello \
+			$(OBJDIR)/user/faultio \
+
+FSIMGTXTFILES :=	$(FSIMGTXTFILES) \
+			fs/lorem \
+			fs/script \
+			fs/testshell.key \
+			fs/testshell.sh
+
+
+FSIMGFILES := $(FSIMGTXTFILES) $(USERAPPS)
+
+$(OBJDIR)/fs/%.o: fs/%.c fs/fs.h inc/lib.h $(OBJDIR)/.vars.USER_CFLAGS
+	@echo + cc[USER] $<
+	@mkdir -p $(@D)
+	$(V)$(CC) -nostdinc $(USER_CFLAGS) -c -o $@ $<
+
+$(OBJDIR)/fs/fs: $(FSOFILES) $(OBJDIR)/lib/entry.o $(OBJDIR)/lib/libjos.a user/user.ld
+	@echo + ld $@
+	$(V)mkdir -p $(@D)
+	$(V)$(LD) -o $@ $(ULDFLAGS) $(LDFLAGS) -nostdlib \
+		$(OBJDIR)/lib/entry.o $(FSOFILES) \
+		-L$(OBJDIR)/lib -ljos $(GCC_LIB)
+	$(V)$(OBJDUMP) -S $@ >$@.asm
+
+# How to build the file system image
+$(OBJDIR)/fs/fsformat: fs/fsformat.c
+	@echo + mk $(OBJDIR)/fs/fsformat
+	$(V)mkdir -p $(@D)
+	$(V)$(NCC) $(NATIVE_CFLAGS) -o $(OBJDIR)/fs/fsformat fs/fsformat.c
+
+$(OBJDIR)/fs/clean-fs.img: $(OBJDIR)/fs/fsformat $(FSIMGFILES)
+	@echo + mk $(OBJDIR)/fs/clean-fs.img
+	$(V)mkdir -p $(@D)
+	$(V)$(OBJDIR)/fs/fsformat $(OBJDIR)/fs/clean-fs.img 1024 $(FSIMGFILES)
+
+$(OBJDIR)/fs/fs.img: $(OBJDIR)/fs/clean-fs.img
+	@echo + cp $(OBJDIR)/fs/clean-fs.img $@
+	$(V)cp $(OBJDIR)/fs/clean-fs.img $@
+
+all: $(OBJDIR)/fs/fs.img
+
+#all: $(addsuffix .sym, $(USERAPPS))
+
+#all: $(addsuffix .asm, $(USERAPPS))
+

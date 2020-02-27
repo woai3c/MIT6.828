@@ -84,6 +84,8 @@ static void check_page_installed_pgdir(void);
 // If we're out of memory, boot_alloc should panic.
 // This function may ONLY be used during initialization,
 // before the page_free_list list has been set up.
+// Note that when this function is called, we are still using entry_pgdir,
+// which only maps the first 4MB of physical memory.
 static void *
 boot_alloc(uint32_t n)
 {
@@ -155,6 +157,7 @@ mem_init(void)
 	size_t sizes = sizeof(struct PageInfo) * npages;
 	pages = (struct PageInfo*)boot_alloc(sizes); //分配足够大的空间(PGSIZE的倍数)保存pages数组
     memset(pages, 0, sizes);
+
 
 	//////////////////////////////////////////////////////////////////////
 	// Make 'envs' point to an array of size 'NENV' of 'struct Env'.

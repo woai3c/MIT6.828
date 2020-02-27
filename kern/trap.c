@@ -146,6 +146,7 @@ trap_init(void)
 	SETGATE(idt[IRQ_OFFSET + 13], 0, GD_KT, irq_13_handler, 0);
 	SETGATE(idt[IRQ_OFFSET + 14], 0, GD_KT, irq_14_handler, 0);
 	SETGATE(idt[IRQ_OFFSET + 15], 0, GD_KT, irq_15_handler, 0);
+
 	// Per-CPU setup 
 	trap_init_percpu();
 }
@@ -279,6 +280,9 @@ trap_dispatch(struct Trapframe *tf)
         lapic_eoi();
         sched_yield();
     }
+	// Handle keyboard and serial interrupts.
+	// LAB 5: Your code here.
+
 	// Unexpected trap: The user process or the kernel has a bug.
 	print_trapframe(tf);
 	if (tf->tf_cs == GD_KT)

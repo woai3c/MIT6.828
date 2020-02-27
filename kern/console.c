@@ -102,6 +102,9 @@ serial_init(void)
 	(void) inb(COM1+COM_IIR);
 	(void) inb(COM1+COM_RX);
 
+	// Enable serial interrupts
+	if (serial_exists)
+		irq_setmask_8259A(irq_mask_8259A & ~(1<<IRQ_SERIAL));
 }
 
 

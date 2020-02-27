@@ -19,7 +19,8 @@ sched_yield(void)
 	//
 	// If no envs are runnable, but the environment previously
 	// running on this CPU is still ENV_RUNNING, it's okay to
-	// choose that environment.
+	// choose that environment. Make sure curenv is not null before
+	// dereferencing it.
 	//
 	// Never choose an environment that's currently running on
 	// another CPU (env_status == ENV_RUNNING). If there are

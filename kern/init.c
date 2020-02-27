@@ -47,16 +47,19 @@ i386_init(void)
 	// Starting non-boot CPUs
 	boot_aps();
 
+	// Start fs.
+	ENV_CREATE(fs_fs, ENV_TYPE_FS);
+
 #if defined(TEST)
 	// Don't touch -- used by grading script!
 	ENV_CREATE(TEST, ENV_TYPE_USER);
 #else
 	// Touch all you want.
-	cprintf("create 3 user environment\n");
-	ENV_CREATE(user_yield, ENV_TYPE_USER);
-	ENV_CREATE(user_yield, ENV_TYPE_USER);
-	ENV_CREATE(user_yield, ENV_TYPE_USER);
+	ENV_CREATE(user_icode, ENV_TYPE_USER);
 #endif // TEST*
+
+	// Should not be necessary - drains keyboard because interrupt has given up.
+	kbd_intr();
 
 	// Schedule and run the first user environment!
 	sched_yield();
@@ -81,14 +84,12 @@ boot_aps(void)
 
 	// Boot each AP one at a time
 	for (c = cpus; c < cpus + ncpu; c++) {
-		if (c == cpus + cpunum())  {// We've started already.
-			cprintf("cpu has already startd(id): %08x\n", c->cpu_id);
+		if (c == cpus + cpunum())  // We've started already.
 			continue;
-		}
+
 		// Tell mpentry.S what stack to use 
 		mpentry_kstack = percpu_kstacks[c - cpus] + KSTKSIZE;
 		// Start the CPU at mpentry_start
-		cprintf("cpu start(id): %08x\n", c->cpu_id);
 		lapic_startap(c->cpu_id, PADDR(code));
 		// Wait for the CPU to finish some basic setup in mp_main()
 		while(c->cpu_status != CPU_STARTED)

@@ -17,6 +17,9 @@
 #include <inc/memlayout.h>
 #include <inc/syscall.h>
 #include <inc/trap.h>
+#include <inc/fs.h>
+#include <inc/fd.h>
+#include <inc/args.h>
 
 #define USED(x)		(void)(x)
 
@@ -46,6 +49,7 @@ int	sys_env_destroy(envid_t);
 void	sys_yield(void);
 static envid_t sys_exofork(void);
 int	sys_env_set_status(envid_t env, int status);
+int	sys_env_set_trapframe(envid_t env, struct Trapframe *tf);
 int	sys_env_set_pgfault_upcall(envid_t env, void *upcall);
 int	sys_page_alloc(envid_t env, void *pg, int perm);
 int	sys_page_map(envid_t src_env, void *src_pg,
@@ -75,7 +79,43 @@ envid_t	ipc_find_env(enum EnvType type);
 envid_t	fork(void);
 envid_t	sfork(void);	// Challenge!
 
+// fd.c
+int	close(int fd);
+ssize_t	read(int fd, void *buf, size_t nbytes);
+ssize_t	write(int fd, const void *buf, size_t nbytes);
+int	seek(int fd, off_t offset);
+void	close_all(void);
+ssize_t	readn(int fd, void *buf, size_t nbytes);
+int	dup(int oldfd, int newfd);
+int	fstat(int fd, struct Stat *statbuf);
+int	stat(const char *path, struct Stat *statbuf);
 
+// file.c
+int	open(const char *path, int mode);
+int	ftruncate(int fd, off_t size);
+int	remove(const char *path);
+int	sync(void);
+
+// pageref.c
+int	pageref(void *addr);
+
+
+// spawn.c
+envid_t	spawn(const char *program, const char **argv);
+envid_t	spawnl(const char *program, const char *arg0, ...);
+
+// console.c
+void	cputchar(int c);
+int	getchar(void);
+int	iscons(int fd);
+int	opencons(void);
+
+// pipe.c
+int	pipe(int pipefds[2]);
+int	pipeisclosed(int pipefd);
+
+// wait.c
+void	wait(envid_t env);
 
 /* File open modes */
 #define	O_RDONLY	0x0000		/* open for reading only */
