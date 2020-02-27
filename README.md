@@ -24,4 +24,8 @@
 * [Lab 4: Preemptive Multitasking](https://www.cnblogs.com/gatsby123/p/9930630.html)
 * [MIT6.828操作系统工程Lab4-Preemptive Multitasking实验报告](https://blog.codedragon.tech/2018/02/26/MIT6-828%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%B7%A5%E7%A8%8BLab4-Preemptive-Multitasking%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/)
 
-## [总结](https://github.com/woai3c/MIT6.828/blob/master/docs/summary.md)
+## 总结
+
+## 其他参考资料
+* [IA-32处理器常用整数指令分类一览](http://www5.zzu.edu.cn/qwfw/info/1042/2434.htm)
+* [Intel 80386 程序员参考手册](https://www.kancloud.cn/wizardforcel/intel-80386-ref-manual/123813)
