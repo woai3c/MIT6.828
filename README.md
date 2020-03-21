@@ -10,6 +10,8 @@ MIT6.828 是 MIT 开源的一门操作系统课程--理论与实践相结合的�
 * [xv6-chinese](https://github.com/woai3c/recommended-books/blob/master/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/xv6-chinese.pdf)
 * [操作系统导论](https://book.douban.com/subject/33463930/)或任意一本操作系统书籍
 
+具体的实验代码请切换到对应的分支查看。
+
 ## 实验参考资料
 ### 0. [MIT6.828 实验环境安装教程](https://github.com/woai3c/MIT6.828/blob/master/docs/install.md)
 ### 1. Lab1参考资料
