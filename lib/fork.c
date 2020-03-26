@@ -69,16 +69,19 @@ duppage(envid_t envid, unsigned pn)
 	int r;
 	// LAB 4: Your code here.
 	int perm = PTE_U | PTE_P;
-	if ((uvpt[pn] & PTE_W) || (uvpt[pn] & PTE_COW)) {
+	void * addr = (void *) (pn * PGSIZE);
+	if ((uvpt[pn] & PTE_SHARE)) {
+		sys_page_map(0, addr, envid, addr, PTE_SYSCALL);
+	} else if ((uvpt[pn] & PTE_W) || (uvpt[pn] & PTE_COW)) {
 		perm |= PTE_COW;
-		if ((r = sys_page_map(0, (void *) (pn * PGSIZE), envid, (void *) (pn * PGSIZE), perm)) < 0) {
+		if ((r = sys_page_map(0, addr, envid, addr, perm)) < 0) {
 			panic("duppage: %e\n", r);
 		}
 
-		if ((r = sys_page_map(0, (void *) (pn * PGSIZE), 0, (void *) (pn * PGSIZE), perm)) < 0) {
+		if ((r = sys_page_map(0, addr, 0, addr, perm)) < 0) {
 			panic("duppage: %e\n", r);
 		}
-	} else if ((r = sys_page_map(0, (void *) (pn * PGSIZE), envid, (void *) (pn * PGSIZE), perm)) < 0) {
+	} else if ((r = sys_page_map(0, addr, envid, addr, perm)) < 0) {
 		panic("duppage: %e\n", r);
 	}
 

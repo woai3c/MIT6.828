@@ -302,6 +302,14 @@ static int
 copy_shared_pages(envid_t child)
 {
 	// LAB 5: Your code here.
+	uint32_t addr;
+	for (addr = 0; addr < USTACKTOP; addr += PGSIZE) {
+		// uvpd是有1024个pde的一维数组，而uvpt是有2^20个pte的一维数组,与物理页号刚好一一对应
+		if ((uvpd[PDX(addr)] & PTE_P) && (uvpt[PGNUM(addr)] & PTE_P) && (uvpt[PGNUM(addr)] & PTE_U) && (uvpt[PGNUM(addr)] & PTE_SHARE)) {
+            sys_page_map(0, (void*) addr, child, (void*) addr, (uvpt[PGNUM(addr)] & PTE_SYSCALL));
+        }
+	}
+
 	return 0;
 }
 
