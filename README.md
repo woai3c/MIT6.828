@@ -41,6 +41,7 @@ MIT6.828 是 MIT 开源的一门操作系统课程--理论与实践相结合的�
 * [Lab2](https://github.com/woai3c/MIT6.828/blob/master/docs/lab2.md)
 * [Lab3](https://github.com/woai3c/MIT6.828/blob/master/docs/lab3.md)
 * [Lab4](https://github.com/woai3c/MIT6.828/blob/master/docs/lab4.md)
+* [Lab5](https://github.com/woai3c/MIT6.828/blob/master/docs/lab5.md)
 
 ## 其他参考资料
 * [IA-32处理器常用整数指令分类一览](http://www5.zzu.edu.cn/qwfw/info/1042/2434.htm)
