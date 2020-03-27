@@ -25,6 +25,10 @@ LIB_SRCFILES :=		$(LIB_SRCFILES) \
 			lib/spawn.c
 
 LIB_SRCFILES :=		$(LIB_SRCFILES) \
+			lib/sockets.c \
+			lib/nsipc.c \
+			lib/malloc.c
+LIB_SRCFILES :=		$(LIB_SRCFILES) \
 			lib/pipe.c \
 			lib/wait.c
 

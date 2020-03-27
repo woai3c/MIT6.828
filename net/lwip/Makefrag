@@ -1,0 +1,73 @@
+LWIP_INCLUDES := \
+	-I$(TOP)/net/lwip/include \
+	-I$(TOP)/net/lwip/include/ipv4 \
+	-I$(TOP)/net/lwip/ext \
+	-I$(TOP)/net/lwip/jos \
+	-I$(TOP)/inc/
+
+OBJDIRS += \
+	net/lwip \
+	net/lwip/api \
+	net/lwip/core \
+	net/lwip/core/ipv4 \
+	net/lwip/netif \
+	net/lwip/jos/arch \
+	net/lwip/jos/jif \
+	net/lwip/jos/api
+
+USER_INC += $(LWIP_INCLUDES)
+
+LWIP_SRCFILES += \
+	net/lwip/api/api_lib.c \
+	net/lwip/api/api_msg.c \
+	net/lwip/api/err.c \
+	net/lwip/api/sockets.c \
+	net/lwip/api/tcpip.c \
+	net/lwip/api/netbuf.c \
+	net/lwip/core/init.c \
+	net/lwip/core/tcp_in.c \
+	net/lwip/core/dhcp.c \
+	net/lwip/core/mem.c \
+	net/lwip/core/memp.c \
+	net/lwip/core/netif.c \
+	net/lwip/core/pbuf.c \
+	net/lwip/core/raw.c \
+	net/lwip/core/stats.c \
+	net/lwip/core/sys.c \
+	net/lwip/core/tcp.c \
+	net/lwip/core/ipv4/ip_addr.c \
+	net/lwip/core/ipv4/icmp.c \
+	net/lwip/core/ipv4/ip.c \
+	net/lwip/core/ipv4/ip_frag.c \
+	net/lwip/core/ipv4/inet_chksum.c \
+	net/lwip/core/ipv4/inet.c \
+	net/lwip/core/tcp_out.c \
+	net/lwip/core/udp.c \
+	net/lwip/netif/etharp.c \
+	net/lwip/netif/loopif.c \
+	net/lwip/jos/arch/sys_arch.c \
+	net/lwip/jos/arch/thread.c \
+	net/lwip/jos/arch/longjmp.S \
+	net/lwip/jos/arch/perror.c \
+	net/lwip/jos/jif/jif.c \
+#	net/lwip/jos/jif/tun.c \
+	net/lwip/jos/api/lsocket.c \
+	net/lwip/jos/api/lwipinit.c
+
+LWIP_OBJFILES := $(patsubst %.c, $(OBJDIR)/%.o, $(LWIP_SRCFILES))
+LWIP_OBJFILES := $(patsubst %.S, $(OBJDIR)/%.o, $(LWIP_OBJFILES))
+
+$(OBJDIR)/net/lwip/%.o: net/lwip/%.c $(OBJDIR)/.vars.USER_CFLAGS
+	@echo + cc[USER] $<
+	$(V)mkdir -p $(@D)
+	$(V)$(CC) -nostdinc $(USER_CFLAGS) $(USER_INC) -c -o $@ $<
+
+$(OBJDIR)/net/lwip/%.o: net/lwip/%.S $(OBJDIR)/.vars.USER_CFLAGS
+	@echo + as[USER] $<
+	@mkdir -p $(@D)
+	$(V)$(CC) -nostdinc $(USER_CFLAGS) -c -o $@ $<
+
+$(OBJDIR)/lib/liblwip.a: $(LWIP_OBJFILES)
+	@echo + ar $@
+	$(V)mkdir -p $(@D)
+	$(V)$(AR) r $@ $(LWIP_OBJFILES)

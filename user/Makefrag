@@ -1,5 +1,6 @@
 OBJDIRS += user
 
+USERLIBS += lwip
 
 USERLIBS += jos
 

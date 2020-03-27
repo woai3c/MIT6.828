@@ -13,6 +13,7 @@
 #include <kern/picirq.h>
 #include <kern/cpu.h>
 #include <kern/spinlock.h>
+#include <kern/time.h>
 
 static struct Taskstate ts;
 
@@ -264,6 +265,7 @@ trap_dispatch(struct Trapframe *tf)
 		tf->tf_regs.reg_eax = syscall(regs.reg_eax, regs.reg_edx, regs.reg_ecx, regs.reg_ebx, regs.reg_edi, regs.reg_esi);
 		return;
 	}
+
 	// Handle spurious interrupts
 	// The hardware sometimes raises these because of noise on the
 	// IRQ line or other reasons. We don't care.
@@ -281,6 +283,12 @@ trap_dispatch(struct Trapframe *tf)
         sched_yield();
     }
 
+	// Add time tick increment to clock interrupts.
+	// Be careful! In multiprocessors, clock interrupts are
+	// triggered on every CPU.
+	// LAB 6: Your code here.
+
+
 	// Handle keyboard and serial interrupts.
 	// LAB 5: Your code here.
 	if (tf->tf_trapno == IRQ_OFFSET+IRQ_KBD) {
@@ -292,7 +300,6 @@ trap_dispatch(struct Trapframe *tf)
         serial_intr();
 		return;
     }
-
 	// Unexpected trap: The user process or the kernel has a bug.
 	print_trapframe(tf);
 	if (tf->tf_cs == GD_KT)
@@ -357,11 +364,10 @@ trap(struct Trapframe *tf)
 	// If we made it to this point, then no other environment was
 	// scheduled, so we should return to the current environment
 	// if doing so makes sense.
-	if (curenv && curenv->env_status == ENV_RUNNING) {
+	if (curenv && curenv->env_status == ENV_RUNNING)
 		env_run(curenv);
-	} else {
+	else
 		sched_yield();
-	}
 }
 
 
@@ -431,7 +437,7 @@ page_fault_handler(struct Trapframe *tf)
 		curenv->env_tf.tf_eip = (uintptr_t) curenv->env_pgfault_upcall;
 		env_run(curenv);
 	}
-
+	
 	// Destroy the environment that caused the fault.
 	cprintf("[%08x] user fault va %08x ip %08x\n",
 		curenv->env_id, fault_va, tf->tf_eip);

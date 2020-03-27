@@ -38,6 +38,12 @@ KERN_SRCFILES +=	kern/mpentry.S \
 			kern/lapic.c \
 			kern/spinlock.c
 
+# Source files for LAB6
+KERN_SRCFILES +=	kern/e100.c \
+			kern/e1000.c \
+			kern/pci.c \
+			kern/time.c
+
 # Only build files if they exist.
 KERN_SRCFILES := $(wildcard $(KERN_SRCFILES))
 
@@ -83,6 +89,15 @@ KERN_BINFILES +=	user/faultio\
 			user/spawnhello \
 			user/icode \
 			fs/fs
+
+# Binary files for LAB6
+KERN_BINFILES +=	user/testtime \
+			user/httpd \
+			user/echosrv \
+			user/echotest \
+			net/testoutput \
+			net/testinput \
+			net/ns
 
 # Binary files for LAB5
 KERN_BINFILES +=	user/testpteshare \

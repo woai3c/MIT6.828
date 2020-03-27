@@ -1,0 +1,27 @@
+
+include net/lwip/Makefrag
+
+NET_SRCFILES :=		net/timer.c \
+			net/input.c \
+			net/output.c
+
+NET_OBJFILES := $(patsubst net/%.c, $(OBJDIR)/net/%.o, $(NET_SRCFILES))
+
+$(OBJDIR)/net/%.o: net/%.c net/ns.h $(OBJDIR)/.vars.USER_CFLAGS $(OBJDIR)/.vars.NET_CFLAGS
+	@echo + cc[USER] $<
+	@mkdir -p $(@D)
+	$(V)$(CC) -nostdinc $(USER_CFLAGS) $(NET_CFLAGS) -c -o $@ $<
+
+$(OBJDIR)/net/ns: $(OBJDIR)/net/serv.o $(NET_OBJFILES) $(OBJDIR)/lib/entry.o $(OBJDIR)/lib/libjos.a $(OBJDIR)/lib/liblwip.a user/user.ld
+	@echo + ld $@
+	$(V)$(LD) -o $@ $(ULDFLAGS) $(LDFLAGS) -nostdlib \
+		$(OBJDIR)/lib/entry.o $< $(NET_OBJFILES) \
+		-L$(OBJDIR)/lib -llwip -ljos $(GCC_LIB)
+	$(V)$(OBJDUMP) -S $@ >$@.asm
+
+$(OBJDIR)/net/test%: $(OBJDIR)/net/test%.o $(NET_OBJFILES) $(OBJDIR)/lib/entry.o $(OBJDIR)/lib/libjos.a $(OBJDIR)/lib/liblwip.a user/user.ld
+	@echo + ld $@
+	$(V)$(LD) -o $@ $(ULDFLAGS) $(LDFLAGS) -nostdlib \
+		$(OBJDIR)/lib/entry.o $< $(NET_OBJFILES) \
+		-L$(OBJDIR)/lib -llwip -ljos $(GCC_LIB)
+	$(V)$(OBJDUMP) -S $@ >$@.asm
