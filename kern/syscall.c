@@ -12,6 +12,10 @@
 #include <kern/console.h>
 #include <kern/sched.h>
 #include <kern/time.h>
+#include <kern/e1000.h>
+
+
+#define debug 0
 
 // Print a string to the system console.
 // The string is exactly 'len' characters long.
@@ -377,7 +381,20 @@ static int
 sys_time_msec(void)
 {
 	// LAB 6: Your code here.
-	panic("sys_time_msec not implemented");
+	return time_msec();
+}
+
+int
+sys_pkt_send(void *data, size_t len)
+{
+	return e1000_transmit(data, len);
+}
+
+
+static int
+sys_pkt_recv(void *addr, size_t *len)
+{
+	return e1000_receive(addr, len);
 }
 
 // Dispatches to the correct kernel function, passing the arguments.
@@ -387,7 +404,6 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 	// Call the function corresponding to the 'syscallno' parameter.
 	// Return any appropriate return value.
 	// LAB 3: Your code here.
-
 	switch (syscallno) {
 		case SYS_cputs:
 			sys_cputs((char *) a1, a2);
@@ -421,6 +437,12 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 			break;
 		case SYS_env_set_trapframe:
 			return sys_env_set_trapframe(a1, (struct Trapframe *) a2);
+		case SYS_time_msec:
+			return sys_time_msec();
+		case SYS_pkt_send:
+			return sys_pkt_send((void *)a1, (size_t)a2);
+		case SYS_pkt_recv:
+			return sys_pkt_recv((void *)a1, (size_t *)a2);
 		default:
 			return -E_INVAL;
 	}
