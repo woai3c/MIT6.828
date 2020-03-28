@@ -36,6 +36,9 @@ MIT6.828 是 MIT 开源的一门操作系统课程--理论与实践相结合的�
 ### 5. Lab5 参考资料
 * [Lab 5: File system, Spawn and Shell](https://www.cnblogs.com/gatsby123/p/9950705.html)
 
+### 6. Lab6 参考资料
+* [MIT-6.828 Lab 6: Network Driver (default final project)](https://www.cnblogs.com/gatsby123/p/10080311.html)
+
 ## 总结
 * [Lab1](https://github.com/woai3c/MIT6.828/blob/master/docs/lab1.md)
 * [Lab2](https://github.com/woai3c/MIT6.828/blob/master/docs/lab2.md)
