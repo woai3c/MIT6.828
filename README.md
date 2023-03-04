@@ -6,8 +6,8 @@ MIT6.828 是 MIT 开源的一门操作系统课程--理论与实践相结合的�
 边学边做，学习效果更加高效。
 
 做这个项目之前建议看看下列资料：
-* [x86汇编语言:从实模式到保护模式](https://github.com/woai3c/recommended-books/blob/master/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/x86%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%20%20%E4%BB%8E%E5%AE%9E%E6%A8%A1%E5%BC%8F%E5%88%B0%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E5%AE%8C%E6%95%B4%E7%89%88.pdf)
-* [xv6-chinese](https://github.com/woai3c/recommended-books/blob/master/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/xv6-chinese.pdf)
+* [x86汇编语言:从实模式到保护模式](https://book.douban.com/subject/20492528/)
+* [xv6-chinese](https://github.com/ranxian/xv6-chinese)
 * [操作系统导论](https://book.douban.com/subject/33463930/)或任意一本操作系统书籍
 
 具体的实验代码请切换到对应的分支查看。
